@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guía para Familias Nuevas - Prejardín Colombo Británico</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Calm Harmony -->
+    <!-- Application Structure Plan: Se ha diseñado una aplicación de una sola página con una navegación superior por pestañas (Inicio, Adaptación, Estrategias, Vida Escolar, Recursos). Esta estructura permite a los padres acceder directamente a la información que más les interesa sin necesidad de un desplazamiento largo y lineal. La sección "Adaptación" utiliza una línea de tiempo interactiva para guiar a los padres a través de las fases del proceso, haciéndolo más digerible y menos abrumador. La sección "Vida Escolar" incluye un gráfico para visualizar la distribución del día del niño. Esta arquitectura fue elegida para ser intuitiva, atractiva y funcional, convirtiendo una guía estática en una herramienta de exploración dinámica que responde a las necesidades específicas de los padres nuevos. -->
+    <!-- Visualization & Content Choices: 1. Proceso de Adaptación -> Meta: Organizar y guiar -> Método: Línea de tiempo interactiva (HTML/Tailwind/JS) -> Interacción: Clic en cada fase para mostrar detalles -> Justificación: Visualiza el progreso en el tiempo, reduciendo la ansiedad y proporcionando información oportuna. 2. Distribución del Día Escolar -> Meta: Informar -> Método: Gráfico de Donut (Chart.js/Canvas) -> Interacción: Tooltips al pasar el mouse -> Justificación: Ofrece un resumen visual rápido y claro de las actividades diarias del niño, más impactante que una lista de texto. 3. Consejos Prácticos -> Meta: Informar -> Método: Tarjetas expandibles (HTML/Tailwind/JS) -> Interacción: Clic para revelar contenido -> Justificación: Mantiene la interfaz limpia y permite a los usuarios enfocarse en un tema a la vez sin sentirse abrumados por la información. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FDFBF8;
+            color: #5d5750;
+        }
+        .nav-link {
+            transition: color 0.3s, border-bottom-color 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        .nav-link.active, .nav-link:hover {
+            color: #4a443d;
+            border-bottom-color: #A7B8A1;
+        }
+        .timeline-item {
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .timeline-item:hover {
+            transform: translateY(-5px);
+        }
+        .timeline-item.active {
+            border-color: #A7B8A1;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+        }
+        .content-card {
+            background-color: #FFFFFF;
+            border-radius: 0.75rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            border: 1px solid #F3F0EC;
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 450px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+            }
+        }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="min-h-screen">
+        <header class="bg-white/80 backdrop-blur-lg sticky top-0 z-50 shadow-sm">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-16">
+                    <div class="flex-shrink-0">
+                        <h1 class="text-xl font-bold text-[#4a443d]">Colombo Británico</h1>
+                        <p class="text-sm text-gray-500 -mt-1">Guía para Familias de Prejardín</p>
+                    </div>
+                    <nav class="hidden md:flex md:space-x-8">
+                        <a href="#inicio" class="nav-link active font-medium py-2">Inicio</a>
+                        <a href="#adaptacion" class="nav-link font-medium py-2">Adaptación</a>
+                        <a href="#estrategias" class="nav-link font-medium py-2">Estrategias</a>
+                        <a href="#vida-escolar" class="nav-link font-medium py-2">Vida Escolar</a>
+                        <a href="#recursos" class="nav-link font-medium py-2">Recursos</a>
+                    </nav>
+                    <div class="md:hidden">
+                        <select id="mobile-nav" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50">
+                            <option value="#inicio">Inicio</option>
+                            <option value="#adaptacion">Adaptación</option>
+                            <option value="#estrategias">Estrategias</option>
+                            <option value="#vida-escolar">Vida Escolar</option>
+                            <option value="#recursos">Recursos</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+           
+            <section id="inicio" class="page-section text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-bold text-[#4a443d] mb-4">¡Bienvenidos a la aventura de Prejardín!</h2>
+                <p class="max-w-3xl mx-auto text-lg text-gray-600">Esta guía interactiva está diseñada para acompañarlos en el emocionante comienzo de la vida escolar de su hijo/a en el Colombo Británico. Aquí encontrarán consejos prácticos y estrategias para que esta transición sea una experiencia positiva y enriquecedora para toda la familia.</p>
+                <div class="mt-10 grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="content-card p-6">
+                        <span class="text-4xl">🚀</span>
+                        <h3 class="text-xl font-bold mt-4 mb-2">Una Nueva Etapa</h3>
+                        <p>Pasar de la guardería al colegio es un gran paso. Celebren este hito y prepárense para un mundo de aprendizaje, amistad y crecimiento.</p>
+                    </div>
+                    <div class="content-card p-6">
+                        <span class="text-4xl">🤝</span>
+                        <h3 class="text-xl font-bold mt-4 mb-2">Somos un Equipo</h3>
+                        <p>La comunicación fluida entre familia y colegio es la clave del éxito. Estamos aquí para apoyarlos en cada paso del camino.</p>
+                    </div>
+                    <div class="content-card p-6">
+                        <span class="text-4xl">🌍</span>
+                        <h3 class="text-xl font-bold mt-4 mb-2">Inmersión al Inglés</h3>
+                        <p>Nuestro ambiente bilingüe abrirá un universo de oportunidades. Apoyen la curiosidad de sus hijos, incluso si ustedes no dominan el idioma.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="adaptacion" class="page-section mb-16">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-[#4a443d] mb-4">El Proceso de Adaptación: Un Viaje Paso a Paso</h2>
+                    <p class="max-w-3xl mx-auto text-lg text-gray-600">La adaptación es un proceso único para cada niño y familia. Esta línea de tiempo interactiva les ayudará a entender qué esperar en cada fase. Hagan clic en cada etapa para descubrir consejos y recomendaciones.</p>
+                </div>
+                <div id="timeline" class="flex flex-col md:flex-row justify-center items-center gap-4 md:gap-0 relative">
+                    <div class="w-full md:w-1/4 p-2">
+                        <div id="timeline-item-1" class="timeline-item active content-card p-4 text-center border-2 border-transparent">
+                            <h3 class="font-bold text-lg">1. Antes de Empezar</h3>
+                            <p class="text-sm">Preparando el terreno</p>
+                        </div>
+                    </div>
+                    <div class="hidden md:block w-12 h-1 bg-[#A7B8A1] rounded-full"></div>
+                    <div class="w-full md:w-1/4 p-2">
+                        <div id="timeline-item-2" class="timeline-item content-card p-4 text-center border-2 border-transparent">
+                            <h3 class="font-bold text-lg">2. La Primera Semana</h3>
+                            <p class="text-sm">Nuevas caras y rutinas</p>
+                        </div>
+                    </div>
+                    <div class="hidden md:block w-12 h-1 bg-[#A7B8A1] rounded-full"></div>
+                     <div class="w-full md:w-1/4 p-2">
+                        <div id="timeline-item-3" class="timeline-item content-card p-4 text-center border-2 border-transparent">
+                            <h3 class="font-bold text-lg">3. El Primer Mes</h3>
+                            <p class="text-sm">Consolidando la confianza</p>
+                        </div>
+                    </div>
+                    <div class="hidden md:block w-12 h-1 bg-[#A7B8A1] rounded-full"></div>
+                    <div class="w-full md:w-1/4 p-2">
+                        <div id="timeline-item-4" class="timeline-item content-card p-4 text-center border-2 border-transparent">
+                            <h3 class="font-bold text-lg">4. Familias Adaptadas</h3>
+                            <p class="text-sm">¡Lo logramos!</p>
+                        </div>
+                    </div>
+                </div>
+                <div id="timeline-content" class="mt-8 content-card p-6 md:p-8 min-h-[200px]">
+                </div>
+            </section>
+
+            <section id="estrategias" class="page-section mb-16">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-[#4a443d] mb-4">Estrategias Clave para el Éxito</h2>
+                    <p class="max-w-3xl mx-auto text-lg text-gray-600">Aquí encontrarán herramientas prácticas para apoyar el desarrollo de sus hijos en tres áreas fundamentales: autonomía, bilingüismo y manejo de emociones. Explore cada sección para obtener consejos concretos.</p>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="content-card p-6">
+                        <h3 class="text-xl font-bold mb-4">🌱 Fomentando la Autonomía</h3>
+                        <ul class="space-y-3 text-gray-700">
+                            <li class="flex items-start"><span class="mr-3 text-lg text-[#A7B8A1]">✓</span><span>Asignar pequeñas responsabilidades en casa (guardar un juguete, poner la servilleta).</span></li>
+                            <li class="flex items-start"><span class="mr-3 text-lg text-[#A7B8A1]">✓</span><span>Permitir que elijan su ropa (entre dos opciones) para que practiquen la toma de decisiones.</span></li>
+                            <li class="flex items-start"><span class="mr-3 text-lg text-[#A7B8A1]">✓</span><span>Enseñarles a ponerse y quitarse los zapatos y la chaqueta solos.</span></li>
+                            <li class="flex items-start"><span class="mr-3 text-lg text-[#A7B8A1]">✓</span><span>Preparar juntos la maleta del colegio la noche anterior.</span></li>
+                        </ul>
+                    </div>
+                    <div class="content-card p-6">
+                        <h3 class="text-xl font-bold mb-4">💬 Apoyo al Bilingüismo</h3>
+                        <ul class="space-y-3 text-gray-700">
+                           <li class="flex items-start"><span class="mr-3 text-lg text-[#A7B8A1]">✓</span><span>Mostrar entusiasmo por el inglés, aunque no lo dominen. Su actitud es contagiosa.</span></li>
+                            <li class="flex items-start"><span class="mr-3 text-lg text-[#A7B8A1]">✓</span><span>Escuchar canciones infantiles en inglés en casa o en el carro.</span></li>
+                            <li class="flex items-start"><span class="mr-3 text-lg text-[#A7B8A1]">✓</span><span>Ver dibujos animados cortos en inglés (con subtítulos si es necesario para ustedes).</span></li>
+                            <li class="flex items-start"><span class="mr-3 text-lg text-[#A7B8A1]">✓</span><span>No presionar para que traduzca. El aprendizaje es un proceso natural de inmersión.</span></li>
+                        </ul>
+                    </div>
+                    <div class="content-card p-6">
+                        <h3 class="text-xl font-bold mb-4">❤️ Gestión de Emociones</h3>
+                        <ul class="space-y-3 text-gray-700">
+                            <li class="flex items-start"><span class="mr-3 text-lg text-[#A7B8A1]">✓</span><span>Validar sus sentimientos: "Entiendo que te sientas triste/nervioso por empezar el colegio".</span></li>
+                            <li class="flex items-start"><span class="mr-3 text-lg text-[#A7B8A1]">✓</span><span>Crear un "ritual de despedida" corto y positivo (un abrazo, un beso y un "hasta luego").</span></li>
+                            <li class="flex items-start"><span class="mr-3 text-lg text-[#A7B8A1]">✓</span><span>Leer cuentos sobre el primer día de clases o sobre cómo manejar las emociones.</span></li>
+                            <li class="flex items-start"><span class="mr-3 text-lg text-[#A7B8A1]">✓</span><span>Mantener la calma en las despedidas, su tranquilidad les da seguridad a ellos.</span></li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+           
+            <section id="vida-escolar" class="page-section mb-16">
+                <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-[#4a443d] mb-4">La Vida en el Colegio</h2>
+                    <p class="max-w-3xl mx-auto text-lg text-gray-600">Entender las rutinas y canales de comunicación del colegio les ayudará a sentirse más conectados y seguros. A continuación, les presentamos una visión general del día a día en Prejardín y cómo podemos mantenernos en contacto.</p>
+                </div>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+                    <div class="content-card p-6 md:p-8">
+                        <h3 class="text-2xl font-bold mb-4 text-center">Un Día Típico en Prejardín</h3>
+                         <p class="text-center text-gray-600 mb-6">El día de su hijo está cuidadosamente balanceado para promover el aprendizaje, la socialización y el descanso. Este gráfico muestra una distribución aproximada de nuestras actividades principales.</p>
+                        <div class="chart-container">
+                            <canvas id="dailyRoutineChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="content-card p-6 md:p-8">
+                        <h3 class="text-2xl font-bold mb-4">Comunicación Familia-Colegio</h3>
+                        <p class="text-gray-600 mb-6">Mantener una comunicación abierta es fundamental. Estos son nuestros canales principales:</p>
+                        <div class="space-y-4">
+                            <div>
+                                <h4 class="font-bold text-lg">Agenda Escolar</h4>
+                                <p>Herramienta diaria para notas importantes entre docentes y padres.</p>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-lg">Correo Electrónico</h4>
+                                <p>Para consultas no urgentes. Recibirán el contacto de la docente titular al inicio del año.</p>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-lg">Reuniones Programadas</h4>
+                                <p>Se convocarán reuniones de seguimiento durante el año para conversar sobre el progreso de su hijo/a.</p>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-lg">Plataforma Educativa</h4>
+                                <p>Consulten la plataforma para circulares, calendarios y anuncios generales del colegio.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="recursos" class="page-section">
+                 <div class="text-center mb-12">
+                    <h2 class="text-3xl md:text-4xl font-bold text-[#4a443d] mb-4">Recursos y Fuentes de Apoyo</h2>
+                    <p class="max-w-3xl mx-auto text-lg text-gray-600">Para construir esta guía, nos hemos basado en fuentes expertas en desarrollo infantil y educación. A continuación, compartimos las referencias en formato APA por si desean profundizar en algún tema.</p>
+                </div>
+                <div class="content-card p-6 md:p-8">
+                    <h3 class="text-2xl font-bold mb-4">Referencias Bibliográficas (Formato APA 7)</h3>
+                    <div class="space-y-4 text-sm md:text-base text-gray-700 bg-gray-50 p-4 rounded-lg">
+                        <p>American Academy of Pediatrics. (2018). <em>Promoting optimal development: Screening for behavioral and emotional problems</em>. Pediatrics, 141(3), e20174347.</p>
+                        <p>Baker, C. (2011). <em>Foundations of bilingual education and bilingualism (5th ed.)</em>. Multilingual Matters.</p>
+                        <p>Bronson, M. B. (2000). <em>Self-regulation in early childhood: Nature and nurture</em>. Guilford Press.</p>
+                        <p>Center on the Developing Child at Harvard University. (2016). <em>From best practices to breakthrough impacts: A science-based approach to building a more promising future for young children and families</em>. http://www.developingchild.harvard.edu</p>
+                        <p>Eisenberg, N., Fabes, R. A., & Spinrad, T. L. (2006). Prosocial development. In N. Eisenberg, W. Damon, & R. M. Lerner (Eds.), <em>Handbook of child psychology: Vol. 3. Social, emotional, and personality development (6th ed.)</em>, pp. 646–718. John Wiley & Sons Inc.</p>
+                        <p>Faber, A., & Mazlish, E. (2012). <em>How to talk so kids will listen & listen so kids will talk</em>. Scribner.</p>
+                        <p>Pianta, R. C., & Cox, M. J. (Eds.). (1999). <em>The transition to kindergarten</em>. Paul H. Brookes Publishing.</p>
+                        <p>Siegel, D. J., & Bryson, T. P. (2012). <em>The whole-brain child: 12 revolutionary strategies to nurture your child's developing mind</em>. Bantam Books.</p>
+                        <p>UNICEF. (2017). <em>Early moments matter for every child</em>. UNICEF. https://www.unicef.org/early-childhood-development</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="bg-white mt-16 border-t">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-gray-500">
+                <p>&copy; 2025 Colombo Británico de Envigado. Desarrollado para apoyar a nuestras nuevas familias.</p>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sections = document.querySelectorAll('.page-section');
+            const navLinks = document.querySelectorAll('.nav-link');
+            const mobileNav = document.getElementById('mobile-nav');
+            const timelineItems = document.querySelectorAll('.timeline-item');
+            const timelineContentEl = document.getElementById('timeline-content');
+
+            const timelineData = {
+                'timeline-item-1': {
+                    title: 'Preparándose en Casa',
+                    content: `
+                        <p class="mb-4">Unas semanas antes, comiencen a hablar con entusiasmo sobre el colegio. Mencionen los nuevos amigos que hará, los juegos y las cosas divertidas que aprenderá.</p>
+                        <ul class="list-disc pl-5 space-y-2">
+                            <li><strong>Visiten el colegio:</strong> Si es posible, pasen por fuera para que el entorno le sea familiar.</li>
+                            <li><strong>Lean cuentos:</strong> Busquen libros sobre el primer día de clases.</li>
+                            <li><strong>Ajusten horarios:</strong> Empiecen a adaptar las rutinas de sueño y comidas a los horarios del colegio.</li>
+                            <li><strong>Hablen del inglés:</strong> Comenten que en el colegio hablará y escuchará mucho en inglés, ¡como en sus dibujos favoritos!</li>
+                        </ul>
+                    `
+                },
+                'timeline-item-2': {
+                    title: 'Navegando la Primera Semana',
+                    content: `
+                        <p class="mb-4">Es normal que haya emociones encontradas (¡tanto para niños como para padres!). La clave es la paciencia, la consistencia y la confianza.</p>
+                        <ul class="list-disc pl-5 space-y-2">
+                            <li><strong>Despedidas cortas y seguras:</strong> Un abrazo, un beso y una promesa de volver. Alargar la despedida puede generar más ansiedad.</li>
+                            <li><strong>Confíen en los docentes:</strong> Somos expertos en manejar estos momentos y en consolar a los niños.</li>
+                            <li><strong>Validar emociones:</strong> Al recogerlo, pregúntenle cómo se sintió. Escuchen sin juzgar.</li>
+                            <li><strong>Descanso es clave:</strong> Es una semana agotadora. Aseguren que duerma lo suficiente.</li>
+                        </ul>
+                    `
+                },
+                'timeline-item-3': {
+                    title: 'Consolidando la Confianza',
+                    content: `
+                        <p class="mb-4">Durante el primer mes, su hijo/a empezará a interiorizar las rutinas, a crear lazos con sus compañeros y docentes, y a sentirse más seguro.</p>
+                        <ul class="list-disc pl-5 space-y-2">
+                            <li><strong>Fomenten la comunicación:</strong> Pregunten sobre sus amigos o su actividad favorita del día.</li>
+                            <li><strong>Observen el progreso:</strong> Notarán más independencia y quizás algunas palabras o canciones en inglés.</li>
+                            <li><strong>Mantengan la rutina:</strong> La consistencia en casa (horarios de dormir, comidas) sigue siendo fundamental.</li>
+                            <li><strong>Comuníquense con nosotros:</strong> Si tienen alguna inquietud, no duden en contactar a la docente.</li>
+                        </ul>
+                    `
+                },
+                'timeline-item-4': {
+                    title: '¡Somos Parte de la Comunidad!',
+                    content: `
+                        <p class="mb-4">Cuando las mañanas son más fluidas y su hijo/a les cuenta con alegría sobre su día, ¡han completado la fase principal de adaptación!</p>
+                        <ul class="list-disc pl-5 space-y-2">
+                            <li><strong>Celebren los logros:</strong> Reconozcan lo valiente y grande que ha sido.</li>
+                            <li><strong>Participen en el colegio:</strong> Asistan a los eventos y reuniones. Ser parte de la comunidad fortalece su sentido de pertenencia.</li>
+                            <li><strong>Sigan apoyando en casa:</strong> La autonomía y el interés por el inglés se cultivan día a día.</li>
+                            <li><strong>Recuerden:</strong> Cada niño tiene su ritmo. El objetivo es que se sienta feliz y seguro en su nuevo entorno.</li>
+                        </ul>
+                    `
+                }
+            };
+           
+            function updateTimelineContent(itemId) {
+                const data = timelineData[itemId];
+                timelineContentEl.innerHTML = `
+                    <h3 class="text-2xl font-bold mb-4">${data.title}</h3>
+                    <div class="prose max-w-none text-gray-700">${data.content}</div>
+                `;
+            }
+
+            timelineItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    timelineItems.forEach(i => i.classList.remove('active'));
+                    item.classList.add('active');
+                    updateTimelineContent(item.id);
+                });
+            });
+
+            updateTimelineContent('timeline-item-1');
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const id = entry.target.getAttribute('id');
+                        navLinks.forEach(link => {
+                            link.classList.toggle('active', link.getAttribute('href') === `#${id}`);
+                        });
+                        if (mobileNav.value !== `#${id}`) {
+                           mobileNav.value = `#${id}`;
+                        }
+                    }
+                });
+            }, { rootMargin: '-50% 0px -50% 0px', threshold: 0 });
+
+            sections.forEach(section => observer.observe(section));
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+           
+            mobileNav.addEventListener('change', (e) => {
+                document.querySelector(e.target.value).scrollIntoView({ behavior: 'smooth' });
+            });
+           
+            const ctx = document.getElementById('dailyRoutineChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Juego Dirigido y Libre', 'Aprendizaje Basado en Proyectos', 'Inmersión en Inglés', 'Descanso y Alimentación', 'Actividades Artísticas y Motoras'],
+                    datasets: [{
+                        data: [30, 25, 20, 15, 10],
+                        backgroundColor: ['#E8C5A4', '#A7B8A1', '#BDB3A9', '#F0E5D9', '#D1C8BF'],
+                        borderColor: '#FDFBF8',
+                        borderWidth: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                padding: 15,
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed !== null) {
+                                        label += context.parsed + '%';
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    cutout: '60%'
+                }
+            });
+        });
+    </script>
+</body>
+</html>
