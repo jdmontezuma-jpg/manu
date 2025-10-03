@@ -8,89 +8,135 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet">
     
     <style>
         body {
             font-family: 'Poppins', sans-serif;
-            background-color: #f0f8ff; /* Azul muy claro para base, consistente con fondo blanco del header */
+            background-color: #f0f8ff; 
             color: #333333;
+            scroll-behavior: smooth; /* Desplazamiento suave para los enlaces */
         }
         .header-bg {
-            background-color: #FFFFFF; /* Fondo blanco para el header, como en la web del CBE */
-            border-bottom: 4px solid #00447C; /* Línea azul oscura para un toque distintivo */
+            background-color: #FFFFFF;
+            border-bottom: 4px solid #00447C; 
         }
         .main-color {
             color: #00447C; /* Azul principal del CBE */
         }
-        .secondary-color {
+        .secondary-color-bg {
             background-color: #FFC107; /* Amarillo/naranja de acento del CBE */
         }
-        .accent-color {
-            color: #4CAF50; /* Verde de contraste, se ve en algunos iconos de la web */
+        .secondary-color-text {
+            color: #FFC107;
         }
+        .accent-color {
+            color: #4CAF50; /* Verde de contraste */
+        }
+        /* Estilos de Navegación */
         .nav-link {
             transition: color 0.3s, border-bottom-color 0.3s, transform 0.2s;
             border-bottom: 3px solid transparent;
-            font-weight: 600; /* Semibold */
-            color: #555555; /* Un gris más oscuro para los enlaces */
+            font-weight: 600;
+            color: #555555;
         }
-        .nav-link.active, .nav-link:hover {
-            color: #00447C; /* Enlace activo en Azul principal */
-            border-bottom-color: #FFC107; /* Borde inferior en Amarillo de acento */
+        .nav-link.active {
+            color: #00447C;
+            border-bottom-color: #FFC107;
             transform: translateY(-2px);
+        }
+        .nav-link:hover {
+            color: #00447C;
+            border-bottom-color: #B0C4DE;
         }
         .content-card {
             background-color: #FFFFFF;
             border-radius: 1rem;
             box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            border: 1px solid #E0E0E0; /* Borde más sutil */
+            border: 1px solid #E0E0E0;
             transition: all 0.3s ease-in-out;
         }
         .content-card:hover {
-            transform: translateY(-5px); /* Un poco más de elevación al hacer hover */
-            box-shadow: 0 12px 24px -6px rgba(0, 0, 0, 0.15);
+            transform: translateY(-3px); /* Reduje el salto para que sea más sutil */
+            box-shadow: 0 12px 24px -6px rgba(0, 0, 0, 0.1);
         }
-        .timeline-item {
+
+        /* Estilos para el Flip Card */
+        .flip-container {
+            perspective: 1000px;
+            width: 100%;
+            height: 350px;
             cursor: pointer;
-            transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
         }
-        .timeline-item:hover {
-            transform: scale(1.03);
-        }
-        .timeline-item.active {
-            border-color: #00447C !important; /* Resaltado de la línea de tiempo en Azul principal */
-            box-shadow: 0 0 0 3px #00447C40; /* Sombra suave para destacar */
-        }
-        .chart-container {
+        .flipper {
+            transition: 0.8s;
+            transform-style: preserve-3d;
             position: relative;
             width: 100%;
-            max-width: 450px;
-            margin-left: auto;
-            margin-right: auto;
-            height: 350px;
+            height: 100%;
         }
-        /* Estilo para Acordeón (Estrategias) */
-        .accordion-header {
-            cursor: pointer;
-            transition: background-color 0.3s;
+        .flip-container.hover .flipper {
+            transform: rotateY(180deg);
         }
-        .accordion-icon {
-            transition: transform 0.3s;
+        .front, .back {
+            backface-visibility: hidden;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 1rem;
+            box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.1);
+            padding: 2.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            border: 2px solid #B0C4DE;
         }
-        .accordion-header.active .accordion-icon {
-            transform: rotate(180deg);
+        .front {
+            z-index: 2;
+            background: linear-gradient(135deg, #FFFFFF 50%, #f0f8ff 100%);
         }
+        .back {
+            transform: rotateY(180deg);
+            background-color: #00447C;
+            color: white;
+            border: 2px solid #FFC107;
+        }
+        .back p {
+            font-size: 1.125rem;
+            line-height: 1.75rem;
+        }
+        
+        /* Estilos para la Barra de Progreso */
+        .progress-bar-container {
+            height: 8px;
+            background-color: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+            width: 100%;
+            margin-top: 0.5rem;
+        }
+        .progress-bar {
+            height: 100%;
+            width: 0;
+            background-color: #4CAF50; /* Verde de progreso */
+            transition: width 0.5s ease-out;
+            border-radius: 4px;
+        }
+
     </style>
 </head>
 <body class="antialiased">
     <div class="min-h-screen">
-        <header class="header-bg backdrop-blur-lg sticky top-0 z-50 shadow-lg">
+        <header class="header-bg sticky top-0 z-50 shadow-lg">
             <div class="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex flex-col md:flex-row items-center justify-between h-auto md:h-24 py-4 md:py-0">
                     <div class="flex-shrink-0 flex items-center mb-4 md:mb-0">
                         <img 
-                            src="https://cbe.edu.co/wp-content/uploads/2024/12/colombo_britanico_envigado_logo.png" 
+                            src="colombo_britanico_envigado_logo.png" 
                             alt="Logo Colegio Colombo Británico Envigado" 
                             class="h-20 w-20 rounded-full shadow-md object-contain p-1"
                             style="background-color: #FFFFFF;"
@@ -122,22 +168,44 @@
 
         <main class="container mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-16">
             
+            <div class="mb-10 p-4 content-card border-l-8 border-r-8 border-[#FFC107]">
+                <p class="text-lg font-semibold main-color mb-2 flex items-center">
+                    <span class="text-2xl mr-2">📈</span>
+                    Progreso General de la Guía: <span id="progress-percentage" class="ml-2 secondary-color-text">0%</span>
+                </p>
+                <div class="progress-bar-container">
+                    <div id="general-progress-bar" class="progress-bar" style="width: 0%;"></div>
+                </div>
+            </div>
+
             <section id="inicio" class="page-section text-center mb-20">
-                <h2 class="text-4xl md:text-5xl font-extrabold main-color mb-4 animate-pulse-slow">¡Bienvenidos a la aventura de Prejardín! 🎉</h2>
+                <h2 class="text-4xl md:text-5xl font-extrabold main-color mb-4">¡Bienvenidos a la aventura de Prejardín! 🎉</h2>
                 <p class="max-w-4xl mx-auto text-xl text-gray-700 font-light mb-12">Esta guía interactiva los acompañará en el comienzo de esta **gran aventura** en el Colegio Colombo Británico. ¡Hagamos de esta transición una experiencia llena de **alegría** y **descubrimientos**!</p>
                 
                 <div class="mt-10 grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <div class="content-card p-6 border-l-4 border-[#FFC107] flex flex-col items-center">
+                    <div class="content-card p-6 border-l-4 border-[#FFC107] flex flex-col items-center transform hover:scale-105 transition duration-300">
                         <span class="text-5xl mb-3">🌱</span>
                         <h3 class="text-xl font-bold main-color mb-2">Una Nueva Etapa</h3>
                         <p class="text-gray-600">Celebren este hito. Prepárense para un mundo de aprendizaje, amistad y crecimiento. ¡Verán grandes avances!</p>
                     </div>
-                    <div class="content-card p-6 border-l-4 border-[#4CAF50] flex flex-col items-center">
-                        <span class="text-5xl mb-3">🤝</span>
-                        <h3 class="text-xl font-bold main-color mb-2">Somos un Equipo</h3>
-                        <p class="text-gray-600">La comunicación constante es la clave. Cuenten con nosotros para apoyarlos en cada paso del camino.</p>
+                    
+                    <div id="flip-card-welcome" class="flip-container mx-auto">
+                        <div class="flipper">
+                            <div class="front">
+                                <span class="text-6xl mb-3 main-color">💖</span>
+                                <h3 class="text-2xl font-extrabold main-color mb-2">Mensaje de Bienvenida</h3>
+                                <p class="text-gray-700">Haz clic o toca para ver el mensaje de nuestra directora de Preescolar.</p>
+                                <span class="mt-4 text-sm secondary-color-text font-bold">¡Hazme Flip!</span>
+                            </div>
+                            <div class="back">
+                                <span class="text-6xl mb-3 text-white">🌟</span>
+                                <h3 class="text-2xl font-extrabold text-[#FFC107] mb-2">¡Un Hogar Lejos del Hogar!</h3>
+                                <p class="text-white font-light">"Cada niño trae una luz única. Estamos aquí para nutrir esa luz con amor, respeto y un ambiente bilingüe estimulante. ¡Confíen en el proceso!"</p>
+                                <p class="mt-4 font-bold text-[#FFC107]">- Dirección de Preescolar CBE</p>
+                            </div>
+                        </div>
                     </div>
-                    <div class="content-card p-6 border-l-4 border-[#00447C] flex flex-col items-center">
+                    <div class="content-card p-6 border-l-4 border-[#00447C] flex flex-col items-center transform hover:scale-105 transition duration-300">
                         <span class="text-5xl mb-3">🗣️</span>
                         <h3 class="text-xl font-bold main-color mb-2">Inmersión al Inglés</h3>
                         <p class="text-gray-600">Nuestro ambiente bilingüe abrirá un universo de oportunidades. Apoyen su curiosidad sin presiones.</p>
@@ -148,14 +216,12 @@
             <hr class="my-16 border-t-4 border-[#FFC107] opacity-50 rounded-full">
 
             <section id="adaptacion" class="page-section mb-20">
-                <div class="text-center mb-14">
-                    <h2 class="text-4xl md:text-5xl font-extrabold main-color mb-4">El Proceso de Adaptación: Un Viaje Paso a Paso 🗺️</h2>
-                    <p class="max-w-4xl mx-auto text-xl text-gray-700 font-light">La adaptación es única para cada familia. **¡Hagan clic** en cada etapa para descubrir consejos y recomendaciones de nuestros expertos!</p>
-                </div>
+                <h2 class="text-4xl md:text-5xl font-extrabold main-color text-center mb-4">El Proceso de Adaptación: Un Viaje Paso a Paso 🗺️</h2>
+                <p class="max-w-4xl mx-auto text-xl text-gray-700 font-light text-center mb-12">La adaptación es única para cada familia. **¡Hagan clic** en cada etapa para descubrir consejos y recomendaciones de nuestros expertos!</p>
                 
                 <div id="timeline" class="flex flex-col md:flex-row justify-center items-center gap-4 md:gap-0 relative">
                     <div class="w-full md:w-1/4 p-2">
-                        <div id="timeline-item-1" class="timeline-item active content-card p-4 text-center border-4 border-[#FFC107] bg-yellow-50/70">
+                        <div id="timeline-item-1" class="timeline-item active content-card p-4 text-center border-4 border-[#FFC107] bg-yellow-50/70 hover:shadow-lg">
                             <span class="text-3xl block mb-1">🏡</span>
                             <h3 class="font-bold text-lg main-color">1. Antes de Empezar</h3>
                             <p class="text-sm text-gray-500">Preparando el terreno</p>
@@ -163,7 +229,7 @@
                     </div>
                     <div class="hidden md:block w-12 h-1 bg-gradient-to-r from-[#FFC107] to-[#4CAF50] rounded-full"></div>
                     <div class="w-full md:w-1/4 p-2">
-                        <div id="timeline-item-2" class="timeline-item content-card p-4 text-center border-4 border-transparent bg-white">
+                        <div id="timeline-item-2" class="timeline-item content-card p-4 text-center border-4 border-transparent bg-white hover:shadow-lg">
                             <span class="text-3xl block mb-1">🏃‍♀️</span>
                             <h3 class="font-bold text-lg main-color">2. La Primera Semana</h3>
                             <p class="text-sm text-gray-500">Nuevas caras y rutinas</p>
@@ -171,7 +237,7 @@
                     </div>
                     <div class="hidden md:block w-12 h-1 bg-gradient-to-r from-[#4CAF50] to-[#00447C] rounded-full"></div>
                     <div class="w-full md:w-1/4 p-2">
-                        <div id="timeline-item-3" class="timeline-item content-card p-4 text-center border-4 border-transparent bg-white">
+                        <div id="timeline-item-3" class="timeline-item content-card p-4 text-center border-4 border-transparent bg-white hover:shadow-lg">
                             <span class="text-3xl block mb-1">🧠</span>
                             <h3 class="font-bold text-lg main-color">3. El Primer Mes</h3>
                             <p class="text-sm text-gray-500">Consolidando la confianza</p>
@@ -179,7 +245,7 @@
                     </div>
                     <div class="hidden md:block w-12 h-1 bg-gradient-to-r from-[#00447C] to-[#B0C4DE] rounded-full"></div>
                     <div class="w-full md:w-1/4 p-2">
-                        <div id="timeline-item-4" class="timeline-item content-card p-4 text-center border-4 border-transparent bg-white">
+                        <div id="timeline-item-4" class="timeline-item content-card p-4 text-center border-4 border-transparent bg-white hover:shadow-lg">
                             <span class="text-3xl block mb-1">🥳</span>
                             <h3 class="font-bold text-lg main-color">4. Familias Adaptadas</h3>
                             <p class="text-sm text-gray-500">¡Lo logramos!</p>
@@ -191,7 +257,7 @@
                 </div>
 
                 <div class="mt-12 text-center">
-                    <img src="https://cbe.edu.co/wp-content/uploads/2024/05/DSC05813-min.jpg" alt="Niños en actividades preescolares del CBE" class="w-full md:w-3/4 lg:w-2/3 mx-auto rounded-xl shadow-lg border-4 border-[#4CAF50]">
+                    <img src="https://images.unsplash.com/photo-1549725204-ff291e77537b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NTc2NXwwfDF8c2VhcmNofDIyfHxwcmVzY2hvb2wlMjBhZGFwdGF0aW9uJTIwY2xhc3Nyb29tfGVufDB8fHx8MTcwOTMxNDIwMHww&ixlib=rb-4.0.3&q=80&w=1080" alt="Niños en actividades preescolares" class="w-full md:w-3/4 lg:w-2/3 mx-auto rounded-xl shadow-lg border-4 border-[#4CAF50]">
                     <p class="text-gray-500 text-sm mt-4">Nuestros pequeños exploradores descubriendo el mundo en un entorno seguro y divertido.</p>
                 </div>
             </section>
@@ -199,14 +265,12 @@
             <hr class="my-16 border-t-4 border-[#00447C] opacity-50 rounded-full">
 
             <section id="estrategias" class="page-section mb-20">
-                <div class="text-center mb-14">
-                    <h2 class="text-4xl md:text-5xl font-extrabold main-color mb-4">Estrategias Clave para el Éxito 💡</h2>
-                    <p class="max-w-4xl mx-auto text-xl text-gray-700 font-light">Herramientas prácticas para apoyar el desarrollo en áreas fundamentales. **¡Toca para expandir** y ver los consejos! 👇</p>
-                </div>
+                <h2 class="text-4xl md:text-5xl font-extrabold main-color text-center mb-4">Estrategias Clave para el Éxito 💡</h2>
+                <p class="max-w-4xl mx-auto text-xl text-gray-700 font-light text-center mb-12">Herramientas prácticas para apoyar el desarrollo en áreas fundamentales. **¡Toca para expandir** y ver los consejos! 👇</p>
                 
                 <div class="space-y-4 max-w-5xl mx-auto">
                     <div class="content-card overflow-hidden">
-                        <div class="accordion-header p-5 flex justify-between items-center bg-[#FFC107] text-white rounded-t-xl" data-target="content-autonomia">
+                        <div class="accordion-header p-5 flex justify-between items-center bg-[#FFC107] text-white rounded-t-xl hover:opacity-90 transition duration-200" data-target="content-autonomia">
                             <h3 class="text-2xl font-bold">✨ Fomentando la Autonomía</h3>
                             <svg class="accordion-icon w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                         </div>
@@ -221,7 +285,7 @@
                     </div>
 
                     <div class="content-card overflow-hidden">
-                        <div class="accordion-header p-5 flex justify-between items-center bg-[#4CAF50] text-white" data-target="content-bilinguismo">
+                        <div class="accordion-header p-5 flex justify-between items-center bg-[#4CAF50] text-white hover:opacity-90 transition duration-200" data-target="content-bilinguismo">
                             <h3 class="text-2xl font-bold">🇬🇧 Apoyo al Bilingüismo</h3>
                             <svg class="accordion-icon w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                         </div>
@@ -236,7 +300,7 @@
                     </div>
 
                     <div class="content-card overflow-hidden">
-                        <div class="accordion-header p-5 flex justify-between items-center bg-[#00447C] text-white rounded-b-xl" data-target="content-emociones">
+                        <div class="accordion-header p-5 flex justify-between items-center bg-[#00447C] text-white rounded-b-xl hover:opacity-90 transition duration-200" data-target="content-emociones">
                             <h3 class="text-2xl font-bold">💚 Gestión de Emociones</h3>
                             <svg class="accordion-icon w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
                         </div>
@@ -252,7 +316,7 @@
                 </div>
 
                 <div class="mt-12 text-center">
-                    <img src="https://cbe.edu.co/wp-content/uploads/2024/05/DSC05934-min.jpg" alt="Niños dibujando y jugando en preescolar del CBE" class="w-full md:w-3/4 lg:w-2/3 mx-auto rounded-xl shadow-lg border-4 border-[#FFC107]">
+                    <img src="https://images.unsplash.com/photo-1549725204-ff291e77537b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NTc2NXwwfDF8c2VhcmNofDEzfHxwcmVzY2hvb2wlMjBjcmVhdGl2aXR5JTIwZ2FtZXN8ZW58MHx8fHwxNzA5MzE0MjI0fDA&ixlib=rb-4.0.3&q=80&w=1080" alt="Niños dibujando y jugando en preescolar" class="w-full md:w-3/4 lg:w-2/3 mx-auto rounded-xl shadow-lg border-4 border-[#FFC107]">
                     <p class="text-gray-500 text-sm mt-4">Momentos de creatividad y aprendizaje en equipo, donde cada niño es protagonista.</p>
                 </div>
             </section>
@@ -260,13 +324,11 @@
             <hr class="my-16 border-t-4 border-[#4CAF50] opacity-50 rounded-full">
             
             <section id="vida-escolar" class="page-section mb-20">
-                <div class="text-center mb-14">
-                    <h2 class="text-4xl md:text-5xl font-extrabold main-color mb-4">La Vida en el Colegio ⏰</h2>
-                    <p class="max-w-4xl mx-auto text-xl text-gray-700 font-light">Una visión general del día a día y nuestros canales de comunicación clave.</p>
-                </div>
+                <h2 class="text-4xl md:text-5xl font-extrabold main-color text-center mb-4">La Vida en el Colegio ⏰</h2>
+                <p class="max-w-4xl mx-auto text-xl text-gray-700 font-light text-center mb-12">Una visión general del día a día y nuestros canales de comunicación clave.</p>
                 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
-                    <div class="content-card p-6 md:p-8">
+                    <div class="content-card p-6 md:p-8 transform hover:scale-[1.01] transition duration-300">
                         <h3 class="text-2xl font-bold mb-4 text-center main-color">Un Día Típico en Prejardín ☀️</h3>
                         <p class="text-center text-gray-600 mb-6">El día de su hijo está cuidadosamente balanceado para promover el aprendizaje, la socialización y el descanso.</p>
                         <div class="chart-container">
@@ -274,7 +336,8 @@
                         </div>
                     </div>
                     
-                    <div class="content-card p-6 md:p-8 bg-[#E6F7FF]"> <h3 class="text-2xl font-bold mb-6 main-color">📢 Comunicación Familia-Colegio</h3>
+                    <div class="content-card p-6 md:p-8 bg-[#E6F7FF] transform hover:scale-[1.01] transition duration-300"> 
+                        <h3 class="text-2xl font-bold mb-6 main-color">📢 Comunicación Familia-Colegio</h3>
                         <div class="space-y-6">
                             <div class="flex items-start">
                                 <span class="text-3xl mr-4 accent-color">📘</span>
@@ -309,7 +372,7 @@
                 </div>
 
                 <div class="mt-12 text-center">
-                    <img src="https://cbe.edu.co/wp-content/uploads/2024/05/DSC05898-min.jpg" alt="Maestra interactuando con niños en preescolar del CBE" class="w-full md:w-3/4 lg:w-2/3 mx-auto rounded-xl shadow-lg border-4 border-[#00447C]">
+                    <img src="https://images.unsplash.com/photo-1576400882743-bc029a997d91?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w0NTc2NXwwfDF8c2VhcmNofDEzfHxwcmVzY2hvb2wlMjB0ZWFjaGVyJTIwcmVhZGluZ3xlbnwwfHx8fDE3MDkzMTQyNDl8MA&ixlib=rb-4.0.3&q=80&w=1080" alt="Maestra interactuando con niños en preescolar" class="w-full md:w-3/4 lg:w-2/3 mx-auto rounded-xl shadow-lg border-4 border-[#00447C]">
                     <p class="text-gray-500 text-sm mt-4">Nuestro equipo docente, dedicado a guiar y apoyar a sus hijos en cada momento del día.</p>
                 </div>
             </section>
@@ -317,11 +380,10 @@
             <hr class="my-16 border-t-4 border-[#B0C4DE] opacity-50 rounded-full">
 
             <section id="recursos" class="page-section">
-                <div class="text-center mb-14">
-                    <h2 class="text-4xl md:text-5xl font-extrabold main-color mb-4">Fuentes de Apoyo y Citas 📚</h2>
-                    <p class="max-w-4xl mx-auto text-xl text-gray-700 font-light">Para aquellos que deseen profundizar en el desarrollo infantil, aquí están nuestras referencias expertas (Formato APA 7).</p>
-                </div>
-                <div class="content-card p-6 md:p-8">
+                <h2 class="text-4xl md:text-5xl font-extrabold main-color text-center mb-4">Fuentes de Apoyo y Citas 📚</h2>
+                <p class="max-w-4xl mx-auto text-xl text-gray-700 font-light text-center mb-12">Para aquellos que deseen profundizar en el desarrollo infantil, aquí están nuestras referencias expertas (Formato APA 7).</p>
+                
+                <div class="content-card p-6 md:p-8 transform hover:scale-[1.01] transition duration-300">
                     <h3 class="text-2xl font-bold main-color mb-4">Referencias Bibliográficas</h3>
                     <div class="space-y-4 text-base text-gray-700 bg-gray-50/70 p-4 rounded-xl border border-gray-200">
                         <p>American Academy of Pediatrics. (2018). <em>Promoting optimal development: Screening for behavioral and emotional problems</em>. Pediatrics, 141(3), e20174347.</p>
@@ -353,28 +415,53 @@
             const timelineItems = document.querySelectorAll('.timeline-item');
             const timelineContentEl = document.getElementById('timeline-content');
             const accordionHeaders = document.querySelectorAll('.accordion-header');
+            const flipCard = document.getElementById('flip-card-welcome');
 
-            // --- Lógica del Acordeón (Estrategias) ---
+            // --- Lógica de la Barra de Progreso (JAVASCRIPT) ---
+            const updateProgressBar = () => {
+                const totalHeight = document.body.scrollHeight - window.innerHeight;
+                const scrollPosition = window.scrollY;
+                let progress = (scrollPosition / totalHeight) * 100;
+                
+                // Limitar el progreso al 100%
+                progress = Math.min(100, Math.max(0, progress));
+
+                document.getElementById('general-progress-bar').style.width = `${progress}%`;
+                document.getElementById('progress-percentage').textContent = `${Math.round(progress)}%`;
+            };
+
+            window.addEventListener('scroll', updateProgressBar);
+            updateProgressBar(); // Ejecutar al cargar para inicializar
+
+
+            // --- Lógica del Flip Card (JAVASCRIPT) ---
+            flipCard.addEventListener('click', () => {
+                flipCard.classList.toggle('hover');
+            });
+
+
+            // --- Lógica del Acordeón (Estrategias - JAVASCRIPT) ---
             accordionHeaders.forEach(header => {
                 header.addEventListener('click', () => {
                     const targetId = header.getAttribute('data-target');
                     const targetContent = document.getElementById(targetId);
 
-                    // Toggle 'active' class on header
                     const isActive = header.classList.contains('active');
-                    accordionHeaders.forEach(h => h.classList.remove('active'));
+                    
+                    // Cierra todos los demás
+                    document.querySelectorAll('.accordion-header').forEach(h => h.classList.remove('active'));
                     document.querySelectorAll('.accordion-content').forEach(c => c.style.maxHeight = 0);
 
                     if (!isActive) {
+                        // Abre el actual
                         header.classList.add('active');
-                        // Calculate the scroll height to smoothly animate
                         targetContent.style.maxHeight = targetContent.scrollHeight + "px";
                     }
                 });
             });
 
 
-            // --- Datos de la Línea de Tiempo ---
+            // --- Datos y Lógica de la Línea de Tiempo (JAVASCRIPT) ---
             const timelineData = {
                 'timeline-item-1': {
                     title: 'Preparándose en Casa 🏠',
@@ -384,7 +471,6 @@
                             <li class="font-semibold">Visiten el colegio: Si es posible, pasen por fuera para que el entorno le sea familiar.</li>
                             <li class="font-semibold">Lean cuentos: Busquen libros sobre el primer día de clases.</li>
                             <li class="font-semibold">Ajusten horarios: Empiecen a adaptar las rutinas de sueño y comidas a los horarios del colegio.</li>
-                            <li class="font-semibold">Hablen del inglés: Comenten que escuchará mucho en inglés, ¡como en sus dibujos favoritos!</li>
                         </ul>
                     `
                 },
@@ -396,7 +482,6 @@
                             <li class="font-semibold">Despedidas cortas y seguras: Un abrazo, un beso y una promesa de volver. Eviten alargar el momento.</li>
                             <li class="font-semibold">Confíen en los docentes: Somos expertos en manejar estos momentos y en consolar a los niños.</li>
                             <li class="font-semibold">Validar emociones: Al recogerlo, pregunten cómo se sintió. Escuchen sin juzgar.</li>
-                            <li class="font-semibold">Descanso es clave: Es una semana agotadora. Aseguren que duerma lo suficiente.</li>
                         </ul>
                     `
                 },
@@ -408,7 +493,6 @@
                             <li class="font-semibold">Fomenten la comunicación: Pregunten sobre sus amigos o su actividad favorita del día.</li>
                             <li class="font-semibold">Observen el progreso: Notarán más independencia y quizás algunas palabras o canciones en inglés.</li>
                             <li class="font-semibold">Mantengan la rutina: La consistencia en casa (horarios de dormir, comidas) sigue siendo fundamental.</li>
-                            <li class="font-semibold">Comuníquense con nosotros: Si tienen alguna inquietud, contacten a la docente de forma oportuna.</li>
                         </ul>
                     `
                 },
@@ -420,7 +504,6 @@
                             <li class="font-semibold">Celebren los logros: Reconozcan lo valiente y grande que ha sido.</li>
                             <li class="font-semibold">Participen en el colegio: Asistan a los eventos y reuniones. Fortalece su sentido de pertenencia.</li>
                             <li class="font-semibold">Sigan apoyando en casa: La autonomía y el interés por el inglés se cultivan día a día.</li>
-                            <li class="font-semibold">Recuerden: Cada niño tiene su ritmo. El objetivo es que se sienta feliz y seguro.</li>
                         </ul>
                     `
                 }
@@ -437,18 +520,12 @@
             timelineItems.forEach(item => {
                 item.addEventListener('click', () => {
                     timelineItems.forEach(i => {
-                        i.classList.remove('active');
-                        i.classList.remove('bg-yellow-50/70'); // Remueve el color de fondo específico
-                        i.classList.add('bg-white'); // Asegura que los inactivos sean blancos
-                        i.classList.remove('border-4');
-                        i.classList.add('border-2');
-                        i.classList.add('border-transparent');
+                        i.classList.remove('active', 'bg-yellow-50/70', 'border-4');
+                        i.classList.add('bg-white', 'border-2', 'border-transparent');
                     });
                     
-                    item.classList.add('active');
-                    item.classList.add('bg-yellow-50/70'); // Nuevo color de fondo al hacer clic
-                    item.classList.remove('border-transparent');
-                    item.classList.add('border-4');
+                    item.classList.add('active', 'bg-yellow-50/70', 'border-4');
+                    item.classList.remove('border-transparent', 'border-2');
                     updateTimelineContent(item.id);
                 });
             });
@@ -457,13 +534,9 @@
             updateTimelineContent('timeline-item-1');
 
 
-            // --- Lógica de Chart.js con Paleta Infantil (ajustada a los nuevos colores) ---
+            // --- Lógica del Gráfico de Rutina Diaria (Chart.js - JAVASCRIPT) ---
             const chartColors = [
-                '#00447C', // Azul principal
-                '#FFC107', // Amarillo/Naranja de acento
-                '#4CAF50', // Verde de contraste
-                '#B0C4DE', // Azul claro
-                '#8D6E63'  // Marrón suave (similar a algunos detalles en la web del CBE)
+                '#00447C', '#FFC107', '#4CAF50', '#B0C4DE', '#8D6E63'
             ];
 
             const ctx = document.getElementById('dailyRoutineChart').getContext('2d');
@@ -486,50 +559,39 @@
                             position: 'bottom',
                             labels: {
                                 padding: 15,
-                                font: {
-                                    size: 14, // Fuente más grande para mejor legibilidad
-                                    weight: '600'
-                                },
+                                font: { size: 14, weight: '600' },
                                 color: '#333333'
                             }
                         },
                         tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.label || '';
-                                    if (label) {
-                                        label = label.split(' ')[0] + ' ' + label.split(' ')[1] + ': '; // Solo las dos primeras palabras
-                                    }
-                                    if (context.parsed !== null) {
-                                        label += context.parsed + '%';
-                                    }
-                                    return label;
-                                }
-                            },
-                            backgroundColor: 'rgba(0, 68, 124, 0.9)', // Fondo del tooltip azul principal
+                            backgroundColor: 'rgba(0, 68, 124, 0.9)',
                             titleFont: { size: 14, weight: 'bold' },
                             bodyFont: { size: 14 }
                         }
                     },
-                    cutout: '65%' // Centro más grande para un look infantil
+                    cutout: '65%'
                 }
             });
 
 
-            // --- Lógica de Navegación (sin cambios sustanciales, pero se actualiza para los nuevos nav-links) ---
+            // --- Lógica de Navegación Fija y Resaltado (JAVASCRIPT) ---
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
                         const id = entry.target.getAttribute('id');
                         navLinks.forEach(link => {
-                            link.classList.toggle('active', link.getAttribute('href') === `#${id}`);
+                            link.classList.remove('active');
+                            if (link.getAttribute('href') === `#${id}`) {
+                                link.classList.add('active');
+                                // Actualizar navegación móvil
+                                if (mobileNav.value !== `#${id}`) {
+                                    mobileNav.value = `#${id}`;
+                                }
+                            }
                         });
-                        if (mobileNav.value !== `#${id}`) {
-                           mobileNav.value = `#${id}`;
-                        }
                     }
                 });
-            }, { rootMargin: '-50% 0px -50% 0px', threshold: 0 });
+            }, { rootMargin: '-50% 0px -50% 0px', threshold: 0 }); // Se activa cuando la sección está en el centro
 
             sections.forEach(section => observer.observe(section));
 
